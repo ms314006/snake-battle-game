@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import SnakeGame from '../../class/SnakeGame';
+import FindCompetitor from '../../components/FindCompetitor';
 import GameOverWindow from '../../components/GameOverWindow';
 
 const StyledSnakeGameComponent = styled.div`
@@ -42,8 +43,10 @@ const GameCanvas = styled.canvas`
 
 const Main = () => {
   const [snakeGame, setSnakeGame] = useState(new SnakeGame({}));
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [hadCompetitor, setHadCompetitor] = useState(false);
 
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  
   const draw = () => {
     if (canvasRef.current) {
       const ctx = canvasRef.current.getContext('2d');
@@ -79,6 +82,7 @@ const Main = () => {
 
   const initialGame = () => {
     setSnakeGame(new SnakeGame({}));
+    setHadCompetitor(false);
   };
 
   useEffect(() => {
@@ -117,7 +121,7 @@ const Main = () => {
   return (
     <StyledSnakeGameComponent>
       <GameTitle>
-        Snake Game
+        Snake Battle Game
         <span role="img" aria-label="snake">🐍</span>
       </GameTitle>
       <GameScreen gridScreenWidth={snakeGame.map.gridScreenWidth}>
@@ -138,6 +142,11 @@ const Main = () => {
           score={snakeGame.score}
           isGameOver={snakeGame.isGameOver}
           initialGame={initialGame}
+        />
+        <FindCompetitor
+          gridScreenWidth={snakeGame.map.gridScreenWidth}
+          hadCompetitor={hadCompetitor}
+          foundCompetitor={() => setHadCompetitor(true)}
         />
       </GameScreen>
     </StyledSnakeGameComponent>
