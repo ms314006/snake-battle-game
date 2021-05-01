@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import webSocket from 'socket.io-client';
 
 const FindCompetitor = styled.div`
   width: ${props => props.gridScreenWidth}px;
@@ -36,14 +37,29 @@ type GameOverWindowProps = {
   gridScreenWidth: number;
   hadCompetitor: boolean;
 
-  foundCompetitor: () => void
+  foundCompetitor: (roomId: string) => void
 }
 
 export default (props: GameOverWindowProps) => {
   const { gridScreenWidth, hadCompetitor, foundCompetitor } = props;
+  const [socketIo, setSocketIo] = useState(null);
+
+  const findCompetitor = () => {
+    setSocketIo(webSocket('http://localhost:3000'));
+  };
+
+  useEffect(() => {
+    if (socketIo === null) return; 
+    socketIo.on('foundCompetitor', (roomId: string) => {
+      foundCompetitor(roomId);
+    });
+
+    socketIo.emit('findCompetitor');
+  }, [socketIo]);
+
   return (
     <FindCompetitor hadCompetitor={hadCompetitor} gridScreenWidth={gridScreenWidth}>
-      <FindCompetitorButton onClick={foundCompetitor}>
+      <FindCompetitorButton onClick={findCompetitor}>
         Find Competitor
       </FindCompetitorButton>
     </FindCompetitor>

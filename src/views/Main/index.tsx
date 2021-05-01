@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import webSocket from 'socket.io-client';
 import SnakeGame from '../../class/SnakeGame';
 import FindCompetitor from '../../components/FindCompetitor';
 import GameOverWindow from '../../components/GameOverWindow';
@@ -43,7 +44,9 @@ const GameCanvas = styled.canvas`
 
 const Main = () => {
   const [snakeGame, setSnakeGame] = useState(new SnakeGame({}));
-  const [hadCompetitor, setHadCompetitor] = useState(false);
+  const [playerRoomId, setPlayerRoomId] = useState<string | null>(null);
+  const [isWatingForAnotherPlayer, setIsWatingForAnotherPlayer] = useState(false);
+  const [socketIo, setSocketIo] = useState(null);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   
@@ -82,7 +85,7 @@ const Main = () => {
 
   const initialGame = () => {
     setSnakeGame(new SnakeGame({}));
-    setHadCompetitor(false);
+    setPlayerRoomId(null);
   };
 
   useEffect(() => {
@@ -118,11 +121,35 @@ const Main = () => {
     }
   }, [snakeGame]);
 
+  useEffect(() => {
+    if (playerRoomId === null) return;
+    setSocketIo(webSocket('http://localhost:3000'));
+  }, [playerRoomId]);
+
+
+  useEffect(() => {
+    if (socketIo === null) return; 
+    socketIo.emit('joinInToRoom', playerRoomId);
+
+    socketIo.on('waitingForAnotherPlayer', () => {
+      setIsWatingForAnotherPlayer(true);
+    });
+
+    socketIo.on('playersIsReady', () => {
+      setIsWatingForAnotherPlayer(false);
+    });
+
+    socketIo.on('updateSnakeGame', (snakeGame: string) => {
+      console.log(snakeGame);
+    });
+  }, [socketIo]);
+
   return (
     <StyledSnakeGameComponent>
       <GameTitle>
         Snake Battle Game
         <span role="img" aria-label="snake">🐍</span>
+        {isWatingForAnotherPlayer && <span style={{ fontSize: 14, }}>（等待另一位玩家...）</span>}
       </GameTitle>
       <GameScreen gridScreenWidth={snakeGame.map.gridScreenWidth}>
         <GameCanvas
@@ -145,8 +172,8 @@ const Main = () => {
         />
         <FindCompetitor
           gridScreenWidth={snakeGame.map.gridScreenWidth}
-          hadCompetitor={hadCompetitor}
-          foundCompetitor={() => setHadCompetitor(true)}
+          hadCompetitor={playerRoomId !== null}
+          foundCompetitor={(roomId) => setPlayerRoomId(roomId)}
         />
       </GameScreen>
     </StyledSnakeGameComponent>

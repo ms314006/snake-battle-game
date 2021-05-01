@@ -25,6 +25,7 @@
     "prop-types": "^15.7.2",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
+    "socket.io-client": "^4.0.1",
     "styled-components": "^5.2.3",
     "uuid": "^3.3.3"
   },
