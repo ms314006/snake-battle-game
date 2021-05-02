@@ -27,7 +27,7 @@
     "react-dom": "^16.5.2",
     "socket.io-client": "^4.0.1",
     "styled-components": "^5.2.3",
-    "uuid": "^3.3.3"
+    "uuid": "^3.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.1.2",

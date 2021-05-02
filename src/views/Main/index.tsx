@@ -1,9 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import webSocket from 'socket.io-client';
+import { v4 as uuidv4 } from 'uuid';
 import SnakeGame from '../../class/SnakeGame';
 import FindCompetitor from '../../components/FindCompetitor';
 import GameOverWindow from '../../components/GameOverWindow';
+import Snake from '../../class/Snake';
+import Apple from '../../class/Apple';
 
 const StyledSnakeGameComponent = styled.div`
   width: 100%;
@@ -44,6 +47,7 @@ const GameCanvas = styled.canvas`
 
 const Main = () => {
   const [snakeGame, setSnakeGame] = useState(new SnakeGame({}));
+  const [playerId, setPlayerId] = useState<string | null>(null);
   const [playerRoomId, setPlayerRoomId] = useState<string | null>(null);
   const [isWatingForAnotherPlayer, setIsWatingForAnotherPlayer] = useState(false);
   const [socketIo, setSocketIo] = useState(null);
@@ -55,31 +59,12 @@ const Main = () => {
       const ctx = canvasRef.current.getContext('2d');
       if (!ctx) return;
       ctx.clearRect(0, 0, snakeGame.map.gridScreenWidth, snakeGame.map.gridScreenWidth);
-
-      if (snakeGame.snake.isAteApple(snakeGame.apple.position)) {
-        snakeGame.snake.addLength(1);
-        const nextApplePosition = snakeGame.generateNewApplePosition();
-        snakeGame.apple.position = nextApplePosition;
-      }
       snakeGame.apple.draw(ctx);
-
-      const nextSnakeHeadPosition = snakeGame.generateNextSnakePosition();
       snakeGame.snake.draw(ctx);
-
-      if (snakeGame.isStartGame && snakeGame.snake.isTouchBody(nextSnakeHeadPosition)) {
-        setSnakeGame(new SnakeGame({ ...snakeGame, isGameOver: true }));
-        return;
-      }
-      snakeGame.snake.headPosition = nextSnakeHeadPosition;
     }
 
     if (!snakeGame.isGameOver) {
-      const MAX_FPS = 35;
-      const INCREASE_FPS = 0.01;
       setTimeout(() => { requestAnimationFrame(draw); }, 1000 / snakeGame.fps);
-      if (snakeGame.isStartGame && snakeGame.fps < MAX_FPS) {
-        snakeGame.fps += INCREASE_FPS;
-      }
     }
   };
 
@@ -90,36 +75,18 @@ const Main = () => {
 
   useEffect(() => {
     const moveDirection = ({ keyCode }) => {
-      const [TOP, RIGHT, BOTTOM, LEFT] = [38, 39, 40, 37];
-      switch (keyCode) {
-        case TOP:
-          if (snakeGame.snake.currentMoveDirection === BOTTOM) return;
-          snakeGame.snake.setDisplacement(0, -snakeGame.map.gridSize);
-          break;
-        case RIGHT:
-          if (snakeGame.snake.currentMoveDirection === LEFT) return;
-          snakeGame.snake.setDisplacement(snakeGame.map.gridSize, 0);
-          break;
-        case BOTTOM:
-          if (snakeGame.snake.currentMoveDirection === TOP) return;
-          snakeGame.snake.setDisplacement(0, snakeGame.map.gridSize);
-          break;
-        case LEFT:
-          if (snakeGame.snake.currentMoveDirection === RIGHT) return;
-          snakeGame.snake.setDisplacement(-snakeGame.map.gridSize, 0);
-          break;
-        default:
-          return;
-      }
-
-      snakeGame.isStartGame = true;
-      snakeGame.snake.currentMoveDirection = keyCode;
+      if (playerId === null || socketIo === null) return;
+      socketIo.emit(
+        'setSnakeDirection',
+        { playerId, playerRoomId, directionKeyCode: keyCode }
+      );
     };
+    window.removeEventListener('keydown', moveDirection);
     window.addEventListener('keydown', moveDirection);
     if (!snakeGame.isGameOver) {
       draw();
     }
-  }, [snakeGame]);
+  }, [socketIo, playerId]);
 
   useEffect(() => {
     if (playerRoomId === null) return;
@@ -129,7 +96,9 @@ const Main = () => {
 
   useEffect(() => {
     if (socketIo === null) return; 
-    socketIo.emit('joinInToRoom', playerRoomId);
+    const playerId = uuidv4();
+    setPlayerId(playerId);
+    socketIo.emit('joinInToRoom', { playerId, playerRoomId });
 
     socketIo.on('waitingForAnotherPlayer', () => {
       setIsWatingForAnotherPlayer(true);
@@ -139,8 +108,10 @@ const Main = () => {
       setIsWatingForAnotherPlayer(false);
     });
 
-    socketIo.on('updateSnakeGame', (snakeGame: string) => {
-      console.log(snakeGame);
+    socketIo.on('updateSnakeGame', ({ snakeGame: nextSnakeGame }) => {
+      snakeGame.snake = new Snake(nextSnakeGame.snake);
+      snakeGame.apple = new Apple(nextSnakeGame.apple);
+      snakeGame.fps = nextSnakeGame.fps;
     });
   }, [socketIo]);
 

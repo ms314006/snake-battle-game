@@ -1,6 +1,4 @@
-import {
-  GRID_SIZE, GRID_COUNT, GAME_SCREEN_WIDTH
-} from '../constants/snakeGame';
+import { GRID_COUNT, GAME_SCREEN_WIDTH } from '../constants/snakeGame';
 import { PositionInterface } from '../class/Position';
 
 export interface MapInterface {
