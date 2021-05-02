@@ -6,7 +6,7 @@ const GameOverWindow = styled.div`
   height: ${props => props.gridScreenWidth}px;
   background: #111217aa;
   position: relative;
-  top: ${props => (props.isGameOver ? -props.gridScreenWidth : -props.gridScreenWidth * 2)}px;
+  top: ${props => (props.isEndGame ? -props.gridScreenWidth : -props.gridScreenWidth * 2)}px;
   transition: top 0.5s;
   display: flex;
   flex-direction: column;
@@ -17,11 +17,7 @@ const GameOverWindow = styled.div`
 
 const Title = styled.div`
   font-size: 40px;
-`;
-
-const GameScore = styled.div`
-  font-size: 32px;
-  margin: 20px 0px 60px 0px;
+  margin-bottom: 40px;
 `;
 
 const RestartButton = styled.button`
@@ -42,17 +38,16 @@ const RestartButton = styled.button`
 
 type GameOverWindow = {
   gridScreenWidth: number;
-  score: number;
-  isGameOver: boolean;
+  isEndGame: boolean;
+  isWinner: boolean;
   initialGame: () => void;
 }
 
 export default (props: GameOverWindow) => {
-  const { initialGame, isGameOver, score, gridScreenWidth } = props;
+  const { initialGame, isEndGame, isWinner, gridScreenWidth } = props;
   return (
-    <GameOverWindow isGameOver={isGameOver} gridScreenWidth={gridScreenWidth}>
-      <Title>GAME OVER</Title>
-      <GameScore>{`Score ${score}`}</GameScore>
+    <GameOverWindow isEndGame={isEndGame} gridScreenWidth={gridScreenWidth}>
+      <Title>{`${isWinner ? 'Winner' : 'Loser'}!`}</Title>
       <RestartButton onClick={initialGame}>
         Restart
       </RestartButton>

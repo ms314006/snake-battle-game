@@ -6,7 +6,8 @@ import Position, { PositionInterface } from './Position';
 interface SnakeGameInterface {
   map: MapInterface;
   isStartGame: boolean;
-  isGameOver: boolean;
+  isEndGame: boolean;
+  isWinner: boolean;
   apple: AppleInterface;
   snake: SnakeInterface;
   score: number;
@@ -21,7 +22,9 @@ class SnakeGame implements SnakeGameInterface {
 
   isStartGame: boolean;
 
-  isGameOver: boolean;
+  isEndGame: boolean;
+
+  isWinner: boolean;
 
   apple: AppleInterface;
 
@@ -33,7 +36,8 @@ class SnakeGame implements SnakeGameInterface {
     this.map = new Map();
     const {
       isStartGame = false,
-      isGameOver = false,
+      isEndGame = false,
+      isWinner = false,
       apple = new Apple({
         appleSize: this.map.gridSize,
         position: new Position(this.map.gridSize, this.map.gridSize),
@@ -46,7 +50,8 @@ class SnakeGame implements SnakeGameInterface {
     } = props || {};
 
     this.isStartGame = isStartGame;
-    this.isGameOver = isGameOver;
+    this.isEndGame = isEndGame;
+    this.isWinner = isWinner;
     this.apple = new Apple(apple);
     this.snake = new Snake(snake);
     this.fps = fps;

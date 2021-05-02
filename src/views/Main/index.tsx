@@ -96,7 +96,11 @@ const Main = () => {
 
   const initialGame = () => {
     setSnakeGame(new SnakeGame({}));
+    setCompetitorSnakeGame(new SnakeGame({}));
     setPlayerRoomId(null);
+    setPlayerId(null);
+    socketIo.close();
+    setSocketIo(null);
   };
 
   useEffect(() => {
@@ -165,8 +169,8 @@ const Main = () => {
           <MapGrid />
           <GameOverWindow
             gridScreenWidth={snakeGame.map.gridScreenWidth}
-            score={snakeGame.score}
-            isGameOver={snakeGame.isGameOver}
+            isEndGame={snakeGame.isEndGame}
+            isWinner={snakeGame.isWinner}
             initialGame={initialGame}
           />
           <FindCompetitor
