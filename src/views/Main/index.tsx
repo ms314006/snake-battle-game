@@ -29,8 +29,8 @@ const GameContent = styled.div`
 `;
 
 const GameScreen = styled.div`
-  width: ${props => props.gridScreenWidth}px;
-  height: ${props => props.gridScreenWidth}px;
+  width: 520px;
+  height: 520px;
   border: 2px solid #b68973;
   border-radius: 4px;
   display: flex;
@@ -39,8 +39,8 @@ const GameScreen = styled.div`
 `;
 
 const CompetitorScreen = styled.div`
-  width: ${props => props.gridScreenWidth}px;
-  height: ${props => props.gridScreenWidth}px;
+  width: 520px;
+  height: 520px;
   border: 2px solid #b68973;
   border-radius: 4px;
   display: flex;
@@ -49,8 +49,8 @@ const CompetitorScreen = styled.div`
 `;
 
 const MapGrid = styled.div`
-  width: ${props => props.gridSize}px;
-  height: ${props => props.gridSize}px;
+  width: 20px;
+  height: 20px;
   border: 1px solid #b6897344;
   box-sizing: border-box;
 `;
@@ -78,19 +78,19 @@ const Main = () => {
     if (canvasRef.current) {
       const ctx = canvasRef.current.getContext('2d');
       if (!ctx) return;
-      ctx.clearRect(0, 0, snakeGame.map.gridScreenWidth, snakeGame.map.gridScreenWidth);
-      snakeGame.apple.draw(ctx);
-      snakeGame.snake.draw(ctx);
+      ctx.clearRect(0, 0, snakeGame.map.columnSize * 20, snakeGame.map.rowSize * 20);
+      snakeGame.apple.draw(ctx, 20);
+      snakeGame.snake.draw(ctx, 20);
     }
 
     if (competitorCanvasRef.current) {
       const ctx = competitorCanvasRef.current.getContext('2d');
       if (!ctx) return;
       ctx.clearRect(
-        0, 0, competitorSnakeGame.map.gridScreenWidth, competitorSnakeGame.map.gridScreenWidth
+        0, 0, competitorSnakeGame.map.columnSize * 20, competitorSnakeGame.map.rowSize * 20
       );
-      competitorSnakeGame.apple.draw(ctx);
-      competitorSnakeGame.snake.draw(ctx);
+      competitorSnakeGame.apple.draw(ctx, 20);
+      competitorSnakeGame.snake.draw(ctx, 20);
     }
   };
 
@@ -113,6 +113,7 @@ const Main = () => {
     };
     window.removeEventListener('keydown', moveDirection);
     window.addEventListener('keydown', moveDirection);
+    moveDirection({ keyCode: 38 });
   }, [socketIo, playerId]);
 
   useEffect(draw, [snakeGame]);
@@ -154,41 +155,39 @@ const Main = () => {
         {isWatingForAnotherPlayer && <span style={{ fontSize: 14, }}>（等待另一位玩家...）</span>}
       </GameTitle>
       <GameContent>
-        <GameScreen gridScreenWidth={snakeGame.map.gridScreenWidth}>
+        <GameScreen>
           <GameCanvas
             ref={canvasRef}
-            width={snakeGame.map.gridScreenWidth}
-            height={snakeGame.map.gridScreenWidth}
+            width="520"
+            height="520"
           />
           {
             Array.from(Array((snakeGame.map.rowSize ** 2) - 1))
               .map((number, index) => (
-                <MapGrid key={index} gridSize={snakeGame.map.gridSize} />
+                <MapGrid key={index} />
               ))
           }
           <MapGrid />
           <GameOverWindow
-            gridScreenWidth={snakeGame.map.gridScreenWidth}
             isEndGame={snakeGame.isEndGame}
             isWinner={snakeGame.isWinner}
             initialGame={initialGame}
           />
           <FindCompetitor
-            gridScreenWidth={snakeGame.map.gridScreenWidth}
             hadCompetitor={playerRoomId !== null}
             foundCompetitor={(roomId) => setPlayerRoomId(roomId)}
           />
         </GameScreen>
-        <CompetitorScreen gridScreenWidth={competitorSnakeGame.map.gridScreenWidth}>
+        <CompetitorScreen>
           <CompetitorGameCanvas
             ref={competitorCanvasRef}
-            width={competitorSnakeGame.map.gridScreenWidth}
-            height={competitorSnakeGame.map.gridScreenWidth}
+            width="520"
+            height="520"
           />
           {
             Array.from(Array((competitorSnakeGame.map.rowSize ** 2) - 1))
               .map((number, index) => (
-                <MapGrid key={index} gridSize={competitorSnakeGame.map.gridSize} />
+                <MapGrid key={index} />
               ))
           }
         </CompetitorScreen>

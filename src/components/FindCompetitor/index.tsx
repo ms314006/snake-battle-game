@@ -3,11 +3,11 @@ import styled from 'styled-components';
 import webSocket from 'socket.io-client';
 
 const FindCompetitor = styled.div`
-  width: ${props => props.gridScreenWidth}px;
-  height: ${props => props.gridScreenWidth}px;
+  width: 520px;
+  height: 520px;
   background: #111217aa;
   position: relative;
-  top: ${props => (props.hadCompetitor ? -props.gridScreenWidth : -props.gridScreenWidth * 2)}px;
+  top: ${props => (props.hadCompetitor ? -520 : -1040)}px;
   transition: top 0.5s;
   display: flex;
   flex-direction: column;
@@ -34,33 +34,35 @@ const FindCompetitorButton = styled.button`
 `;
 
 type GameOverWindowProps = {
-  gridScreenWidth: number;
   hadCompetitor: boolean;
 
   foundCompetitor: (roomId: string) => void
 }
 
 export default (props: GameOverWindowProps) => {
-  const { gridScreenWidth, hadCompetitor, foundCompetitor } = props;
+  const { hadCompetitor, foundCompetitor } = props;
   const [socketIo, setSocketIo] = useState(null);
+  const [isFinding, setIsFinding] = useState(false);
 
   const findCompetitor = () => {
     setSocketIo(webSocket('http://localhost:3000'));
+    setIsFinding(true);
   };
 
   useEffect(() => {
     if (socketIo === null) return; 
     socketIo.on('foundCompetitor', (roomId: string) => {
       foundCompetitor(roomId);
+      setIsFinding(false);
     });
 
     socketIo.emit('findCompetitor');
   }, [socketIo]);
 
   return (
-    <FindCompetitor hadCompetitor={hadCompetitor} gridScreenWidth={gridScreenWidth}>
+    <FindCompetitor hadCompetitor={hadCompetitor}>
       <FindCompetitorButton onClick={findCompetitor}>
-        Find Competitor
+        {isFinding ? 'Finding...' : 'Let\'s Find Competitor!'}
       </FindCompetitorButton>
     </FindCompetitor>
   );

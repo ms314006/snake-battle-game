@@ -5,7 +5,7 @@ export interface AppleInterface {
 
   position: PositionInterface;
 
-  draw: (ctx: CanvasRenderingContext2D) => void;
+  draw: (ctx: CanvasRenderingContext2D, gridSize: number) => void;
 }
 
 class Apple implements AppleInterface {
@@ -23,13 +23,13 @@ class Apple implements AppleInterface {
     this.position = position;
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D, gridSize: number) {
     ctx.fillStyle = '#faf3e0';
     ctx.fillRect(
-      this.position.x,
-      this.position.y,
-      this.appleSize,
-      this.appleSize,
+      this.position.x * gridSize,
+      this.position.y * gridSize,
+      this.appleSize * gridSize,
+      this.appleSize * gridSize,
     );
   }
 }
