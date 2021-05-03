@@ -7,7 +7,7 @@ const FindCompetitor = styled.div`
   height: 520px;
   background: #111217aa;
   position: relative;
-  top: ${props => (props.hadCompetitor ? -520 : -1040)}px;
+  top: ${props => (props.hadCompetitor ? -0 : -520)}px;
   transition: top 0.5s;
   display: flex;
   flex-direction: column;

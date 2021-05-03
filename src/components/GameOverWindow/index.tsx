@@ -6,7 +6,7 @@ const GameOverWindow = styled.div`
   height: 520px;
   background: #111217aa;
   position: relative;
-  top: ${props => (props.isEndGame ? -520 : -1040)}px;
+  top: ${props => (props.isEndGame ? -0 : -520)}px;
   transition: top 0.5s;
   display: flex;
   flex-direction: column;

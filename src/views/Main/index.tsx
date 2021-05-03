@@ -48,13 +48,6 @@ const CompetitorScreen = styled.div`
   overflow: hidden;
 `;
 
-const MapGrid = styled.div`
-  width: 20px;
-  height: 20px;
-  border: 1px solid #b6897344;
-  box-sizing: border-box;
-`;
-
 const GameCanvas = styled.canvas`
   position: absolute;
 `;
@@ -79,6 +72,7 @@ const Main = () => {
       const ctx = canvasRef.current.getContext('2d');
       if (!ctx) return;
       ctx.clearRect(0, 0, snakeGame.map.columnSize * 20, snakeGame.map.rowSize * 20);
+      snakeGame.map.draw(ctx, 20);
       snakeGame.apple.draw(ctx, 20);
       snakeGame.snake.draw(ctx, 20);
     }
@@ -89,6 +83,7 @@ const Main = () => {
       ctx.clearRect(
         0, 0, competitorSnakeGame.map.columnSize * 20, competitorSnakeGame.map.rowSize * 20
       );
+      snakeGame.map.draw(ctx, 20);
       competitorSnakeGame.apple.draw(ctx, 20);
       competitorSnakeGame.snake.draw(ctx, 20);
     }
@@ -99,8 +94,6 @@ const Main = () => {
     setCompetitorSnakeGame(new SnakeGame({}));
     setPlayerRoomId(null);
     setPlayerId(null);
-    socketIo.close();
-    setSocketIo(null);
   };
 
   useEffect(() => {
@@ -144,6 +137,11 @@ const Main = () => {
     }) => {
       setSnakeGame(new SnakeGame(nextSnakeGame));
       setCompetitorSnakeGame(new SnakeGame(nextCompetitorSnakeGame));
+
+      if (nextSnakeGame.isEndGame) {
+        socketIo.close();
+        setSocketIo(null);
+      }
     });
   }, [socketIo]);
 
@@ -161,13 +159,6 @@ const Main = () => {
             width="520"
             height="520"
           />
-          {
-            Array.from(Array((snakeGame.map.rowSize ** 2) - 1))
-              .map((number, index) => (
-                <MapGrid key={index} />
-              ))
-          }
-          <MapGrid />
           <GameOverWindow
             isEndGame={snakeGame.isEndGame}
             isWinner={snakeGame.isWinner}
@@ -184,12 +175,6 @@ const Main = () => {
             width="520"
             height="520"
           />
-          {
-            Array.from(Array((competitorSnakeGame.map.rowSize ** 2) - 1))
-              .map((number, index) => (
-                <MapGrid key={index} />
-              ))
-          }
         </CompetitorScreen>
       </GameContent>
     </StyledSnakeGameComponent>
