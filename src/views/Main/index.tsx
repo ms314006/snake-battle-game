@@ -5,6 +5,9 @@ import { v4 as uuidv4 } from 'uuid';
 import SnakeGame from '../../class/SnakeGame';
 import FindCompetitor from '../../components/FindCompetitor';
 import GameOverWindow from '../../components/GameOverWindow';
+import GameScreen from '../../components/GameScreen';
+import CompetitorScreen from '../../components/CompetitorScreen';
+import GameCanvas from '../../components/GameCanvas';
 
 const StyledSnakeGameComponent = styled.div`
   width: 100%;
@@ -28,34 +31,6 @@ const GameContent = styled.div`
   grid-template-columns: 540px 270px;
 `;
 
-const GameScreen = styled.div`
-  width: 520px;
-  height: 520px;
-  border: 2px solid #b68973;
-  border-radius: 4px;
-  display: flex;
-  flex-wrap: wrap;
-  overflow: hidden;
-`;
-
-const CompetitorScreen = styled.div`
-  width: 520px;
-  height: 520px;
-  border: 2px solid #b68973;
-  border-radius: 4px;
-  display: flex;
-  flex-wrap: wrap;
-  overflow: hidden;
-`;
-
-const GameCanvas = styled.canvas`
-  position: absolute;
-`;
-
-const CompetitorGameCanvas = styled.canvas`
-  position: absolute;
-`;
-
 const Main = () => {
   const [snakeGame, setSnakeGame] = useState(new SnakeGame({}));
   const [competitorSnakeGame, setCompetitorSnakeGame] = useState(new SnakeGame({}));
@@ -63,31 +38,6 @@ const Main = () => {
   const [playerRoomId, setPlayerRoomId] = useState<string | null>(null);
   const [isWatingForAnotherPlayer, setIsWatingForAnotherPlayer] = useState(false);
   const [socketIo, setSocketIo] = useState(null);
-
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const competitorCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  
-  const draw = () => {
-    if (canvasRef.current) {
-      const ctx = canvasRef.current.getContext('2d');
-      if (!ctx) return;
-      ctx.clearRect(0, 0, snakeGame.map.columnSize * 20, snakeGame.map.rowSize * 20);
-      snakeGame.map.draw(ctx, 20);
-      snakeGame.apple.draw(ctx, 20);
-      snakeGame.snake.draw(ctx, 20);
-    }
-
-    if (competitorCanvasRef.current) {
-      const ctx = competitorCanvasRef.current.getContext('2d');
-      if (!ctx) return;
-      ctx.clearRect(
-        0, 0, competitorSnakeGame.map.columnSize * 20, competitorSnakeGame.map.rowSize * 20
-      );
-      snakeGame.map.draw(ctx, 20);
-      competitorSnakeGame.apple.draw(ctx, 20);
-      competitorSnakeGame.snake.draw(ctx, 20);
-    }
-  };
 
   const initialGame = () => {
     setSnakeGame(new SnakeGame({}));
@@ -109,14 +59,10 @@ const Main = () => {
     moveDirection({ keyCode: 38 });
   }, [socketIo, playerId]);
 
-  useEffect(draw, [snakeGame]);
-  useEffect(draw, [competitorSnakeGame]);
-
   useEffect(() => {
     if (playerRoomId === null) return;
     setSocketIo(webSocket('http://localhost:3000'));
   }, [playerRoomId]);
-
 
   useEffect(() => {
     if (socketIo === null) return; 
@@ -155,9 +101,9 @@ const Main = () => {
       <GameContent>
         <GameScreen>
           <GameCanvas
-            ref={canvasRef}
-            width="520"
-            height="520"
+            sideLengthOfGameCanvas={520}
+            sideLengthOfGrid={20}
+            snakeGame={snakeGame}
           />
           <GameOverWindow
             isEndGame={snakeGame.isEndGame}
@@ -170,10 +116,10 @@ const Main = () => {
           />
         </GameScreen>
         <CompetitorScreen>
-          <CompetitorGameCanvas
-            ref={competitorCanvasRef}
-            width="520"
-            height="520"
+          <GameCanvas
+            sideLengthOfGameCanvas={260}
+            sideLengthOfGrid={10}
+            snakeGame={competitorSnakeGame}
           />
         </CompetitorScreen>
       </GameContent>
