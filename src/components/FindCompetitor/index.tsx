@@ -45,7 +45,7 @@ export default (props: GameOverWindowProps) => {
   const [isFinding, setIsFinding] = useState(false);
 
   const findCompetitor = () => {
-    setSocketIo(webSocket('http://localhost:3000'));
+    setSocketIo(webSocket('https://snake-battle-game-server.herokuapp.com/'));
     setIsFinding(true);
   };
 
