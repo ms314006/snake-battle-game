@@ -61,7 +61,7 @@ const Main = () => {
 
   useEffect(() => {
     if (playerRoomId === null) return;
-    setSocketIo(webSocket('http://localhost:3000'));
+    setSocketIo(webSocket('https://snake-battle-game-server.herokuapp.com/'));
   }, [playerRoomId]);
 
   useEffect(() => {
